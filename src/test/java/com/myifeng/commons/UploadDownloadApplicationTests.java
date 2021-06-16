@@ -1,8 +1,7 @@
 package com.myifeng.commons;
 
 import org.json.JSONArray;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,10 +12,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,9 +45,9 @@ class UploadDownloadApplicationTests {
     @Test
     void testUploadSingleFile() throws Exception {
         MockMultipartFile mockFile = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello World!".getBytes());
-        MvcResult result = mvc.perform(
+        mvc.perform(
                 MockMvcRequestBuilders
-                        .multipart("/single")
+                        .multipart("/appendix")
                         .file(mockFile)
                         .characterEncoding(StandardCharsets.UTF_8.name())
                         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -52,13 +56,12 @@ class UploadDownloadApplicationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andReturn();
-
-        var file = Paths.get(uploadFolder, new JSONArray(result.getResponse().getContentAsString()).getString(0)).toFile();
-
-        Assert.isTrue(file.exists(), "File not found!");
-
-        file.deleteOnExit();
+                .andDo(res -> {
+                    var path = new JSONArray(res.getResponse().getContentAsString()).getString(0);
+                    var uploadFile = Paths.get(uploadFolder, path).toFile();
+                    Assert.isTrue(uploadFile.exists(), "File not found!");
+                    Assert.isTrue(uploadFile.length() == mockFile.getSize(), "Inconsistent file size!");
+                });
     }
 
     @Test
@@ -66,43 +69,96 @@ class UploadDownloadApplicationTests {
         MockMultipartFile mockFile1 = new MockMultipartFile("file1", "hello1.txt", MediaType.TEXT_PLAIN_VALUE, "Hello World 1!".getBytes());
         MockMultipartFile mockFile2 = new MockMultipartFile("file2", "hello2.txt", MediaType.TEXT_PLAIN_VALUE, "Hello World 2!".getBytes());
         MockMultipartFile mockFile3 = new MockMultipartFile("file2", "hello3.txt", MediaType.TEXT_PLAIN_VALUE, "Hello World 3!".getBytes());
-        MvcResult result = mvc.perform(
+        mvc.perform(
                 MockMvcRequestBuilders
-                        .multipart("/multiple")
+                        .multipart("/appendix/multiple")
                         .file(mockFile1)
                         .file(mockFile2)
                         .file(mockFile3)
-                        .characterEncoding("utf-8")
+                        .characterEncoding(StandardCharsets.UTF_8.name())
                         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
         )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(3))
-                .andReturn();
+                .andDo(result -> {
+                    var paths = new JSONArray(result.getResponse().getContentAsString());
 
-        var paths = new JSONArray(result.getResponse().getContentAsString());
+                    var file1 = Paths.get(uploadFolder, paths.getString(0)).toFile();
+                    Assert.isTrue(file1.exists(), "File not found!");
 
-        var file1 = Paths.get(uploadFolder, paths.getString(0)).toFile();
-        Assert.isTrue(file1.exists(), "File not found!");
+                    var file2 = Paths.get(uploadFolder, paths.getString(1)).toFile();
+                    Assert.isTrue(file2.exists(), "File not found!");
 
-        var file2 = Paths.get(uploadFolder, paths.getString(1)).toFile();
-        Assert.isTrue(file2.exists(), "File not found!");
-
-        var file3 = Paths.get(uploadFolder, paths.getString(2)).toFile();
-        Assert.isTrue(file3.exists(), "File not found!");
-
-        file1.deleteOnExit();
-        file2.deleteOnExit();
-        file3.deleteOnExit();
+                    var file3 = Paths.get(uploadFolder, paths.getString(2)).toFile();
+                    Assert.isTrue(file3.exists(), "File not found!");
+                });
 
     }
 
     @Test
-    void downloadTest() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/test/notExists.txt"))
+    void testDownloadNotExistFile() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/appendix/test/notExists.txt"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDownloadExistingFile() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello World!".getBytes());
+        mvc.perform(
+                MockMvcRequestBuilders
+                        .multipart("/appendix")
+                        .file(mockFile)
+                        .characterEncoding(StandardCharsets.UTF_8.name())
+                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andDo(res -> {
+                    var path = new JSONArray(res.getResponse().getContentAsString()).getString(0);
+                    var uploadFile = Paths.get(uploadFolder, path).toFile();
+                    Assert.isTrue(uploadFile.exists(), "File not found!");
+                    Assert.isTrue(uploadFile.length() == mockFile.getSize(), "Inconsistent file size!");
+
+                    mvc.perform(MockMvcRequestBuilders.get(path.replaceAll("\\\\", "/")))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andDo(mvcResult -> {
+                                var downloadFile = Paths.get(uploadFolder, UUID.randomUUID().toString(), mockFile.getOriginalFilename()).toFile();
+                                downloadFile.getParentFile().mkdirs();
+                                downloadFile.createNewFile();
+                                var outputStream = new FileOutputStream(downloadFile);
+                                var bin = new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray());
+                                StreamUtils.copy(bin, outputStream);
+                                outputStream.close();
+
+                                Assert.isTrue(downloadFile.exists(), "File not found!");
+                                Assert.isTrue(downloadFile.length() == mockFile.getSize(), "Inconsistent file size!");
+                            });
+                });
+    }
+
+    @AfterEach
+    void deleteAllTestFiles() {
+        deleteFile(Paths.get(uploadFolder).toFile());
+    }
+
+    private boolean deleteFile(File dirFile) {
+        if (!dirFile.exists()) {
+            return false;
+        }
+        if (dirFile.isFile()) {
+            return dirFile.delete();
+        } else {
+            for (var file : dirFile.listFiles()) {
+                deleteFile(file);
+            }
+        }
+        return dirFile.delete();
     }
 
 }
