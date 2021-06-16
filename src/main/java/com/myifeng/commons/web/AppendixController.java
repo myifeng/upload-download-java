@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -48,7 +51,7 @@ public class AppendixController {
     public List<String> fileUpload(HttpServletRequest request) {
         var lists = ((MultipartHttpServletRequest) request).getMultiFileMap().values();
 
-        var subPath = request.getRequestURI();
+        var subPath = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
         var relativePath = Paths.get(uploadFolder, subPath);
         if (!relativePath.toFile().exists()) {
             try {
@@ -91,16 +94,16 @@ public class AppendixController {
      */
     @GetMapping("/**")
     public ResponseEntity<InputStreamResource> getFile(HttpServletRequest request) throws IOException {
-        var path = Paths.get(uploadFolder, request.getRequestURI());
+        var path = Paths.get(uploadFolder, URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8));
         var file = path.toFile();
         if (file.exists() && file.isFile()) {
             return ResponseEntity
                     .ok()
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
-                    .header(HttpHeaders.CACHE_CONTROL, "no-cache")
                     .header(HttpHeaders.PRAGMA, "no-cache")
                     .header(HttpHeaders.EXPIRES, "0")
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,  "attachment; filename=\"" + new String(file.getName().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"")
+                    .contentType(MediaTypeFactory.getMediaType(path.toString()).orElse(MediaType.APPLICATION_OCTET_STREAM))
                     .contentLength(file.length())
                     .body(new InputStreamResource(Files.newInputStream(path)));
         } else {

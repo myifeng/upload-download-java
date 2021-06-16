@@ -142,6 +142,44 @@ class UploadDownloadApplicationTests {
                 });
     }
 
+    @Test
+    void testDownloadFilePathWithUTF_8() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile("file", "你好.txt", MediaType.TEXT_PLAIN_VALUE, "你好，世界！".getBytes());
+        mvc.perform(
+                MockMvcRequestBuilders
+                        .multipart("/appendix/你好")
+                        .file(mockFile)
+                        .characterEncoding(StandardCharsets.UTF_8.name())
+                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andDo(res -> {
+                    var path = new JSONArray(new String(res.getResponse().getContentAsString().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8)).getString(0);
+                    var uploadFile = Paths.get(uploadFolder, path).toFile();
+                    Assert.isTrue(uploadFile.exists(), "File not found!");
+                    Assert.isTrue(uploadFile.length() == mockFile.getSize(), "Inconsistent file size!");
+
+                    mvc.perform(MockMvcRequestBuilders.get(path.replaceAll("\\\\", "/")))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andDo(mvcResult -> {
+                                var downloadFile = Paths.get(uploadFolder, UUID.randomUUID().toString(), mockFile.getOriginalFilename()).toFile();
+                                downloadFile.getParentFile().mkdirs();
+                                downloadFile.createNewFile();
+                                var outputStream = new FileOutputStream(downloadFile);
+                                var bin = new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray());
+                                StreamUtils.copy(bin, outputStream);
+                                outputStream.close();
+
+                                Assert.isTrue(downloadFile.exists(), "File not found!");
+                                Assert.isTrue(downloadFile.length() == mockFile.getSize(), "Inconsistent file size!");
+                            });
+                });
+    }
+
     @AfterEach
     void deleteAllTestFiles() {
         deleteFile(Paths.get(uploadFolder).toFile());
