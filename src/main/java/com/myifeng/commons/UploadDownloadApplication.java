@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CommonsUploadDownloadApplication {
+public class UploadDownloadApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CommonsUploadDownloadApplication.class, args);
+		SpringApplication.run(UploadDownloadApplication.class, args);
 	}
 
 }
