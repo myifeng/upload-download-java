@@ -4,13 +4,14 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/myifeng/upload-download-java/Java%20CI%20with%20Gradle)
 ![license](https://img.shields.io/github/license/myifeng/upload-download-java)
 
-*[English](README.md)  ∙ [简体中文](README.zh-CN.md)*
+🌍
+*[English](README.md)  ∙ [简体中文](README_zh-CN.md)*
 
-**A file upload and download module for Java.**
+**Java语言开发的文件上传和下载通用模块**
 
-**It is out of business and returns a collection of file paths that you can decide how to use and where to use。**
+**脱离具体业务场景，上传成功后返回一个文件路径的数组，开发者可以决定如何去使用该路径。**
 
-## Environments
+## 环境
 
 - JDK 11
 
@@ -18,9 +19,9 @@
 
 - Spring Boot 2.5.1
 
-## Usage
+## 用法
 
-- ### Upload
+- ### 上传文件
 ``` http request
 POST /appendix/test
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -38,26 +39,26 @@ Content-Type: application/x-gzip
 ["\\appendix\\test\\daad5d07-2be6-44fa-978c-1581931a63a2\\demo.tar.gz"]
 ```
 
-- ### Download
+- ### 获取文件
 
 ```http request
 GET /appendix/test/daad5d07-2be6-44fa-978c-1581931a63a2/demo.tar.gz
 ```
-## Related Efforts
+## 相关工程
 
 - [upload-download-nodejs](https://github.com/myifeng/upload-download-nodejs) - A file upload and download module for Node.js.
 
-## Maintainers
+## 维护者
 
 [@myifeng](https://github.com/myifeng).
 
-## Contributing
+## 贡献代码
 
 Feel free to dive in! [Open an issue](https://github.com/myifeng/upload-download-java/issues/new) or submit PRs.
 
 Standard Readme follows the [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) Code of Conduct.
 
-## License
+## 使用许可
 
 [MIT](LICENSE) © myifeng
 
