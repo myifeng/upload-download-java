@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,12 +47,13 @@ public class AppendixController {
      * @param request
      * @return return ["$RequestURI/$UUID/$filename"]
      * E.g : ["appendix/images/cf109c9e-7662-4c71-9a3d-27d3fd664206/hello.jpg", ...]
+     * @throws UnsupportedEncodingException
      */
     @PostMapping(value = "/**")
-    public List<String> fileUpload(HttpServletRequest request) {
+    public List<String> fileUpload(HttpServletRequest request) throws UnsupportedEncodingException {
         var lists = ((MultipartHttpServletRequest) request).getMultiFileMap().values();
 
-        var subPath = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
+        var subPath = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8.name());
         var relativePath = Paths.get(uploadFolder, subPath);
         if (!relativePath.toFile().exists()) {
             try {
@@ -94,7 +96,7 @@ public class AppendixController {
      */
     @GetMapping("/**")
     public ResponseEntity<InputStreamResource> getFile(HttpServletRequest request) throws IOException {
-        var path = Paths.get(uploadFolder, URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8));
+        var path = Paths.get(uploadFolder, URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8.name()));
         var file = path.toFile();
         if (file.exists() && file.isFile()) {
             return ResponseEntity
