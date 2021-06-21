@@ -4,7 +4,9 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/myifeng/upload-download-java/Java%20CI%20with%20Gradle)
 ![license](https://img.shields.io/github/license/myifeng/upload-download-java)
 
-A file upload and download module for Java.(通用性的文件上传与下载模块)
+**A file upload and download module for Java.**
+
+**It is out of business and returns a collection of file paths that you can decide how to use and where to use。**
 
 ## Environments
 
@@ -18,7 +20,7 @@ A file upload and download module for Java.(通用性的文件上传与下载模
 
 - ### Upload
 ``` http request
-POST /appendix/mydir
+POST /appendix/test
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
@@ -29,12 +31,15 @@ Content-Type: application/x-gzip
 # Here you specify file to upload
 < ../../tar/demo.tar.gz
 --WebAppBoundary--
+
+# return a collection of file paths
+["\\appendix\\test\\daad5d07-2be6-44fa-978c-1581931a63a2\\demo.tar.gz"]
 ```
 
 - ### Download
 
 ```http request
-GET /appendix/mydir/8a061b2a-bdde-489b-82e5-c3a018af9e9f/demo.tar.gz
+GET /appendix/test/daad5d07-2be6-44fa-978c-1581931a63a2/demo.tar.gz
 ```
 ## Related Efforts
 
