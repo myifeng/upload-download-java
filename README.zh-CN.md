@@ -36,8 +36,8 @@ Content-Type: application/x-gzip
 --WebAppBoundary--
 
 # return a collection of file paths
-["test\\daad5d07-2be6-44fa-978c-1581931a63a2\\demo.tar.gz"] (Windows)
-["test/daad5d07-2be6-44fa-978c-1581931a63a2/demo.tar.gz"] (Linux/Mac OS)
+["\\appendix\\test\\daad5d07-2be6-44fa-978c-1581931a63a2\\demo.tar.gz"] (Windows)
+["/appendix/test/daad5d07-2be6-44fa-978c-1581931a63a2/demo.tar.gz"] (Linux/MAC OS)
 ```
 
 - ### 获取文件
