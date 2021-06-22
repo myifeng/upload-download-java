@@ -64,7 +64,7 @@ public class AppendixController {
             }
         }
         var filePaths = new ArrayList<String>();
-        lists.stream().forEach(files -> files.stream().forEach(file -> {
+        lists.forEach(files -> files.forEach(file -> {
             try {
                 var outputFilePath = Paths.get(subPath, UUID.randomUUID().toString(), file.getOriginalFilename());
                 var absolutePath = Paths.get(uploadFolder, outputFilePath.toString());
@@ -104,7 +104,7 @@ public class AppendixController {
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.PRAGMA, "no-cache")
                     .header(HttpHeaders.EXPIRES, "0")
-                    .header(HttpHeaders.CONTENT_DISPOSITION,  "attachment; filename=\"" + new String(file.getName().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + new String(file.getName().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"")
                     .contentType(MediaTypeFactory.getMediaType(path.toString()).orElse(MediaType.APPLICATION_OCTET_STREAM))
                     .contentLength(file.length())
                     .body(new InputStreamResource(Files.newInputStream(path)));
