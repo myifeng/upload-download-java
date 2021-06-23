@@ -36,7 +36,7 @@ publishing {
 		}
 		maven {
 			name = "GitHubPackages"
-			url = "https://maven.pkg.github.com/myifeng/commons-upload-download"
+			url = "https://maven.pkg.github.com/myifeng/upload-download-java"
 			credentials {
 				username = System.getenv("GITHUB_ACTOR")
 				password = System.getenv("GITHUB_TOKEN")
