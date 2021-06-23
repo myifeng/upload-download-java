@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.5.1'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id 'maven-publish'
 }
 
 group = 'com.myifeng'
@@ -21,4 +22,25 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+publishing {
+	repositories {
+		maven {
+			name = "OSSRH"
+			url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+			credentials {
+				username = System.getenv("MAVEN_USERNAME")
+				password = System.getenv("MAVEN_PASSWORD")
+			}
+		}
+		maven {
+			name = "GitHubPackages"
+			url = "https://maven.pkg.github.com/myifeng/commons-upload-download"
+			credentials {
+				username = System.getenv("GITHUB_ACTOR")
+				password = System.getenv("GITHUB_TOKEN")
+			}
+		}
+	}
 }
