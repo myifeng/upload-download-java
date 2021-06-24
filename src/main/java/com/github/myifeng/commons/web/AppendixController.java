@@ -1,4 +1,4 @@
-package com.myifeng.commons.web;
+package com.github.myifeng.commons.web;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
