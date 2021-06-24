@@ -1,4 +1,4 @@
-package com.myifeng.commons;
+package com.github.myifeng.commons;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
