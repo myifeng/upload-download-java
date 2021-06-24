@@ -25,6 +25,37 @@ test {
 }
 
 publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifactId = 'commons-upload-download'
+			groupId = 'com.github.myifeng'
+			from components.java
+			pom {
+				name = 'upload-download-java'
+				description = 'A file upload and download module for Java.'
+				url = 'https://github.com/myifeng/upload-download-java'
+				packaging = 'jar'
+				scm {
+					connection = 'scm:git:https://github.com/myifeng/upload-download-java.git'
+					developerConnection = 'scm:git:git@github.com:myifeng/upload-download-java.git'
+					url = 'https://github.com/myifeng/upload-download-java'
+				}
+				licenses {
+					license {
+						name = 'The MIT License'
+						url = 'https://choosealicense.com/licenses/mit/'
+					}
+				}
+				developers {
+					developer {
+						id = 'myifeng'
+						name = 'myifeng'
+						email = 'myifengs@gmail.com'
+					}
+				}
+			}
+		}
+	}
 	repositories {
 		maven {
 			name = "OSSRH"
