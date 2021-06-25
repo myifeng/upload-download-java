@@ -4,6 +4,7 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/myifeng/upload-download-java/Java%20CI%20with%20Gradle)
 ![license](https://img.shields.io/github/license/myifeng/upload-download-java)
 
+🌍
 *[English](README.md)  ∙ [简体中文](README.zh-CN.md)*
 
 **A file upload and download module for Java.**
