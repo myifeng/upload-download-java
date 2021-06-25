@@ -47,7 +47,7 @@ GET /appendix/test/daad5d07-2be6-44fa-978c-1581931a63a2/demo.tar.gz
 ```
 ## 相关工程
 
-- [upload-download-nodejs](https://github.com/myifeng/upload-download-nodejs) - A file upload and download module for Node.js.
+- [upload-download-nodejs](https://github.com/myifeng/upload-download-nodejs) - Node.js语言开发的文件上传和下载通用模块.
 
 ## 维护者
 
@@ -55,9 +55,15 @@ GET /appendix/test/daad5d07-2be6-44fa-978c-1581931a63a2/demo.tar.gz
 
 ## 贡献代码
 
-Feel free to dive in! [Open an issue](https://github.com/myifeng/upload-download-java/issues/new) or submit PRs.
+遇到问题请[创建issue](https://github.com/myifeng/upload-download-java/issues/new) ,也欢迎提供代码提交PR
 
-Standard Readme follows the [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) Code of Conduct.
+贡献代码的规范和标准请参阅 [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/).
+
+## 贡献者
+
+非常感谢以下所有的贡献者：
+
+[![All contributions](https://contrib.rocks/image?repo=myifeng/upload-download-java)](https://github.com/myifeng/upload-download-java/graphs/contributors)
 
 ## 使用许可
 
