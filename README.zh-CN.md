@@ -5,7 +5,7 @@
 ![license](https://img.shields.io/github/license/myifeng/upload-download-java)
 
 🌍
-*[English](README.md)  ∙ [简体中文](README_zh-CN.md)*
+*[English](README.md)  ∙ [简体中文](README.zh-CN.md)*
 
 **Java语言开发的文件上传和下载通用模块**
 
