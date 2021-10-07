@@ -1,1 +1,2 @@
-
+appendix:
+  upload-folder: ${UPLOAD-FOLDER:./}
