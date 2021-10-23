@@ -21,12 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RequestMapping(value = "/appendix")
 @RestController
@@ -73,7 +71,10 @@ public class AppendixController {
 							try {
 								Path outputFilePath = Paths.get(subPath, UUID.randomUUID().toString(), file.getOriginalFilename());
 								Path absolutePath = Paths.get(uploadFolder, outputFilePath.toString());
-								absolutePath.toFile().getParentFile().mkdirs();
+								File parent = absolutePath.toFile().getParentFile();
+								if (!parent.mkdirs()) {
+									throw new IOException(String.format("Couldn't create directory %s", parent.getAbsolutePath()));
+								}
 
 								InputStream inputStream = file.getInputStream();
 								OutputStream outputStream = Files.newOutputStream(absolutePath);
