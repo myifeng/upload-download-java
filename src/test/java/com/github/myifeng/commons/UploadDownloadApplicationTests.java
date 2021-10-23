@@ -18,7 +18,9 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -57,8 +59,8 @@ class UploadDownloadApplicationTests {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andDo(res -> {
-                    var path = new JSONArray(res.getResponse().getContentAsString()).getString(0);
-                    var uploadFile = Paths.get(uploadFolder, path).toFile();
+                    String path = new JSONArray(res.getResponse().getContentAsString()).getString(0);
+                    File uploadFile = Paths.get(uploadFolder, path).toFile();
                     Assert.isTrue(uploadFile.exists(), "File not found!");
                     Assert.isTrue(uploadFile.length() == mockFile.getSize(), "Inconsistent file size!");
                 });
@@ -83,15 +85,15 @@ class UploadDownloadApplicationTests {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(3))
                 .andDo(result -> {
-                    var paths = new JSONArray(result.getResponse().getContentAsString());
+                    JSONArray paths = new JSONArray(result.getResponse().getContentAsString());
 
-                    var file1 = Paths.get(uploadFolder, paths.getString(0)).toFile();
+                    File file1 = Paths.get(uploadFolder, paths.getString(0)).toFile();
                     Assert.isTrue(file1.exists(), "File not found!");
 
-                    var file2 = Paths.get(uploadFolder, paths.getString(1)).toFile();
+                    File file2 = Paths.get(uploadFolder, paths.getString(1)).toFile();
                     Assert.isTrue(file2.exists(), "File not found!");
 
-                    var file3 = Paths.get(uploadFolder, paths.getString(2)).toFile();
+                    File file3 = Paths.get(uploadFolder, paths.getString(2)).toFile();
                     Assert.isTrue(file3.exists(), "File not found!");
                 });
 
@@ -119,8 +121,8 @@ class UploadDownloadApplicationTests {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andDo(res -> {
-                    var path = new JSONArray(res.getResponse().getContentAsString()).getString(0);
-                    var uploadFile = Paths.get(uploadFolder, path).toFile();
+                    String path = new JSONArray(res.getResponse().getContentAsString()).getString(0);
+                    File uploadFile = Paths.get(uploadFolder, path).toFile();
                     Assert.isTrue(uploadFile.exists(), "File not found!");
                     Assert.isTrue(uploadFile.length() == mockFile.getSize(), "Inconsistent file size!");
 
@@ -128,12 +130,11 @@ class UploadDownloadApplicationTests {
                             .andDo(print())
                             .andExpect(status().isOk())
                             .andDo(mvcResult -> {
-                                var downloadFile = Paths.get(uploadFolder, UUID.randomUUID().toString(), mockFile.getOriginalFilename()).toFile();
+                                File downloadFile = Paths.get(uploadFolder, UUID.randomUUID().toString(), mockFile.getOriginalFilename()).toFile();
                                 downloadFile.getParentFile().mkdirs();
                                 downloadFile.createNewFile();
-                                var outputStream = new FileOutputStream(downloadFile);
-                                var bin = new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray());
-                                StreamUtils.copy(bin, outputStream);
+                                OutputStream outputStream = new FileOutputStream(downloadFile);
+                                StreamUtils.copy(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()), outputStream);
                                 outputStream.close();
 
                                 Assert.isTrue(downloadFile.exists(), "File not found!");
@@ -157,8 +158,8 @@ class UploadDownloadApplicationTests {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andDo(res -> {
-                    var path = new JSONArray(new String(res.getResponse().getContentAsString().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8)).getString(0);
-                    var uploadFile = Paths.get(uploadFolder, path).toFile();
+                    String path = new JSONArray(new String(res.getResponse().getContentAsString().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8)).getString(0);
+                    File uploadFile = Paths.get(uploadFolder, path).toFile();
                     Assert.isTrue(uploadFile.exists(), "File not found!");
                     Assert.isTrue(uploadFile.length() == mockFile.getSize(), "Inconsistent file size!");
 
@@ -166,12 +167,11 @@ class UploadDownloadApplicationTests {
                             .andDo(print())
                             .andExpect(status().isOk())
                             .andDo(mvcResult -> {
-                                var downloadFile = Paths.get(uploadFolder, UUID.randomUUID().toString(), mockFile.getOriginalFilename()).toFile();
+                                File downloadFile = Paths.get(uploadFolder, UUID.randomUUID().toString(), mockFile.getOriginalFilename()).toFile();
                                 downloadFile.getParentFile().mkdirs();
                                 downloadFile.createNewFile();
-                                var outputStream = new FileOutputStream(downloadFile);
-                                var bin = new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray());
-                                StreamUtils.copy(bin, outputStream);
+                                OutputStream outputStream = new FileOutputStream(downloadFile);
+                                StreamUtils.copy(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()), outputStream);
                                 outputStream.close();
 
                                 Assert.isTrue(downloadFile.exists(), "File not found!");
@@ -192,7 +192,7 @@ class UploadDownloadApplicationTests {
         if (dirFile.isFile()) {
             return dirFile.delete();
         } else {
-            for (var file : dirFile.listFiles()) {
+            for (File file : dirFile.listFiles()) {
                 deleteFile(file);
             }
         }

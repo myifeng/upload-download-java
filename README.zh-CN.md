@@ -13,11 +13,11 @@
 
 ## 环境
 
-- JDK 11
+- JDK 8
 
 - Gradle 7.0.2
 
-- Spring Boot 2.5.1
+- Spring Boot 2.5.5
 
 ## 用法
 
