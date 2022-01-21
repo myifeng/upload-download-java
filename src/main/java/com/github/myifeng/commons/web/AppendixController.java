@@ -31,94 +31,93 @@ import java.util.stream.Collectors;
 @RestController
 public class AppendixController {
 
-    @Value("${appendix.upload-folder:./}")
-    private String uploadFolder;
+	@Value("${appendix.upload-folder:./}")
+	private String uploadFolder;
 
-    @PostConstruct
-    public void init() throws IOException {
-        Path path = Paths.get(uploadFolder);
-        if (!path.toFile().exists()) {
-            Files.createDirectories(path);
-        }
-    }
+	@PostConstruct
+	public void init() throws IOException {
+		Path path = Paths.get(uploadFolder);
+		if (!path.toFile().exists()) {
+			Files.createDirectories(path);
+		}
+	}
 
-    /**
-     * Upload single file or multiple files.
-     * Use RequestURI and UUID as subPath.
-     * Return a collection of paths.
-     *
-     * @param request
-     * @return return ["$RequestURI/$UUID/$filename"]
-     * E.g : ["appendix/images/cf109c9e-7662-4c71-9a3d-27d3fd664206/hello.jpg", ...]
-     * @throws UnsupportedEncodingException
-     */
-    @PostMapping(value = "/**")
-    public List<String> fileUpload(HttpServletRequest request) throws UnsupportedEncodingException {
-        Collection<List<MultipartFile>> multiFiles = ((MultipartHttpServletRequest) request).getMultiFileMap().values();
+	/**
+	 * Upload single file or multiple files.
+	 * Use RequestURI and UUID as subPath.
+	 * Return a collection of paths.
+	 *
+	 * @param request
+	 * @return return ["$RequestURI/$UUID/$filename"]
+	 * E.g : ["appendix/images/cf109c9e-7662-4c71-9a3d-27d3fd664206/hello.jpg", ...]
+	 * @throws UnsupportedEncodingException
+	 */
+	@PostMapping(value = "/**")
+	public List<String> fileUpload(HttpServletRequest request) throws UnsupportedEncodingException {
+		Collection<List<MultipartFile>> multiFiles = ((MultipartHttpServletRequest) request).getMultiFileMap().values();
 
-        String subPath = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8.name());
-        Path relativePath = Paths.get(uploadFolder, subPath);
-        if (!relativePath.toFile().exists()) {
-            try {
-                Files.createDirectories(relativePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException("createDirectories " + relativePath + " fail");
-            }
-        }
-        return multiFiles.stream()
-                .flatMap(files ->
-                        files.stream().map(file -> {
-                            try {
-                                Path outputFilePath = Paths.get(subPath, UUID.randomUUID().toString(), file.getOriginalFilename());
-                                Path absolutePath = Paths.get(uploadFolder, outputFilePath.toString());
-                                File parent = absolutePath.toFile().getParentFile();
-                                if (!parent.mkdirs()) {
-                                    throw new IOException(String.format("Couldn't create directory %s", parent.getAbsolutePath()));
-                                }
+		String subPath = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8.name());
+		Path relativePath = Paths.get(uploadFolder, subPath);
+		if (!relativePath.toFile().exists()) {
+			try {
+				Files.createDirectories(relativePath);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException("createDirectories " + relativePath + " fail");
+			}
+		}
+		return multiFiles.stream()
+				.flatMap(List::stream)
+				.map(file -> {
+					try {
+						Path outputFilePath = Paths.get(subPath, UUID.randomUUID().toString(), file.getOriginalFilename());
+						Path absolutePath = Paths.get(uploadFolder, outputFilePath.toString());
+						File parent = absolutePath.toFile().getParentFile();
+						if (!parent.mkdirs()) {
+							throw new IOException(String.format("Couldn't create directory %s", parent.getAbsolutePath()));
+						}
 
-                                InputStream inputStream = file.getInputStream();
-                                OutputStream outputStream = Files.newOutputStream(absolutePath);
-                                byte[] tempts = new byte[1024];
-                                int battered;
-                                while ((battered = inputStream.read(tempts)) != -1) {
-                                    outputStream.write(tempts, 0, battered);
-                                }
-                                inputStream.close();
-                                outputStream.close();
-                                return outputFilePath.toString();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        })
-                ).collect(Collectors.toList());
-    }
+						InputStream inputStream = file.getInputStream();
+						OutputStream outputStream = Files.newOutputStream(absolutePath);
+						byte[] tempts = new byte[1024];
+						int battered;
+						while ((battered = inputStream.read(tempts)) != -1) {
+							outputStream.write(tempts, 0, battered);
+						}
+						inputStream.close();
+						outputStream.close();
+						return outputFilePath.toString();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return null;
+				}).collect(Collectors.toList());
+	}
 
-    /**
-     * Download file
-     *
-     * @param request https://localhost:8080/appendix/images/cf109c9e-7662-4c71-9a3d-27d3fd664206/hello.jpg
-     * @return
-     * @throws IOException
-     */
-    @GetMapping("/**")
-    public ResponseEntity<InputStreamResource> getFile(HttpServletRequest request) throws IOException {
-        Path path = Paths.get(uploadFolder, URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8.name()));
-        File file = path.toFile();
-        if (file.exists() && file.isFile()) {
-            return ResponseEntity
-                    .ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
-                    .header(HttpHeaders.PRAGMA, "no-cache")
-                    .header(HttpHeaders.EXPIRES, "0")
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + new String(file.getName().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"")
-                    .contentType(MediaTypeFactory.getMediaType(path.toString()).orElse(MediaType.APPLICATION_OCTET_STREAM))
-                    .contentLength(file.length())
-                    .body(new InputStreamResource(Files.newInputStream(path)));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+	/**
+	 * Download file
+	 *
+	 * @param request https://localhost:8080/appendix/images/cf109c9e-7662-4c71-9a3d-27d3fd664206/hello.jpg
+	 * @return
+	 * @throws IOException
+	 */
+	@GetMapping("/**")
+	public ResponseEntity<InputStreamResource> getFile(HttpServletRequest request) throws IOException {
+		Path path = Paths.get(uploadFolder, URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8.name()));
+		File file = path.toFile();
+		if (file.exists() && file.isFile()) {
+			return ResponseEntity
+					.ok()
+					.header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+					.header(HttpHeaders.PRAGMA, "no-cache")
+					.header(HttpHeaders.EXPIRES, "0")
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + new String(file.getName().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"")
+					.contentType(MediaTypeFactory.getMediaType(path.toString()).orElse(MediaType.APPLICATION_OCTET_STREAM))
+					.contentLength(file.length())
+					.body(new InputStreamResource(Files.newInputStream(path)));
+		} else {
+			return ResponseEntity.notFound().build();
+		}
+	}
 
 }
