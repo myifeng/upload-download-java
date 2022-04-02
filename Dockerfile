@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-buster
+FROM openjdk:11-jre-buster
 
 LABEL maintainer="myifeng <myifengs@gmail.com>"
 
